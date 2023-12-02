@@ -59,9 +59,9 @@ For example the **key - value_array** will look like : **"wword" : ["word", "wor
 - Some words could be leftout or misjudged.<br>
 - It's likely to take a long time to go through each word.
 - But... will there really be that many typo variants for one word...?
+- ***유저들의 행동이 모든게 계획대로 돌아가야 함.***
 
 
 Last but not least, a great ***THANK YOU*** my teammates for being patient with me!
 [@nayoungbae](https://www.kaggle.com/nayoungbae) [@chanhyukhan](https://www.kaggle.com/chanhyukhan) [@bangsioni](https://www.kaggle.com/bangsioni)
 
-***유저들의 행동이 모든게 계획대로 돌아가야 함.***
