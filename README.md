@@ -1,5 +1,7 @@
 # json_speller
 
+Training in progress
+
 ### 답답하면 니가 뛰던지
 의 '니'를 맡게 되었습니다.
 
