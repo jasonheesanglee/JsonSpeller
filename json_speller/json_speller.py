@@ -49,70 +49,121 @@ for st in freq_d.split('\n'):
     sym_words[st.split()[0]] = int(st.split()[1])
 
 class SpellChecker:
-    def __init__(self, list_text, freq_dict):
+    def __init__(self, list_text, word_dict):
         self.list_text = list_text
-        self.eng_dict = freq_dict
+        self.word_dict = set(word_dict)
+        self.num_word, self.spell_misspells = self.funct(list_text)
 
+    def to_json(self, spell_misspells):
+        '''
+        ::keyword : misspelled word
+        ::bag_of_word : list of possible corrections
+        
+        This function takes keyword and bag_of_words as an input.
+        Exports the input in json format file.
+        '''
+        if os.path.isfile('misspell_dict.json'):
+            with open('misspell_dict.json', 'r') as file:
+                existing_data = json.load(file)
+        else:
+            existing_data = {}
+        
+        for key, value in spell_misspells.items():
+            if key in existing_data:
+                # Extend the list in existing_data with new items not already present
+                existing_data[key].extend(item for item in value if item not in existing_data[key])
+            else:
+                existing_data[key] = value
+    
+        with open('misspell_dict.json', 'w') as file:
+            # Dump the existing_data dictionary which now contains the updated data
+            json.dump(existing_data, file, indent=4)
+    
+    def funct(self, list_text):
+        '''
+        ::list_text : texts(str) in a list
+        
+        This function takes a list of texts as input.
+        
+        Returns 
+        1. count of each word
+        2. dictionary of misspelled_word : [list of possible correction]
+        '''
+        tokenized_texts = [self.tokenize(text) for text in list_text]
+        all_words_flat = [word for text in tokenized_texts for word in text]
+
+        num_word = defaultdict(int) # count how many correctly spelled words in all text
+        for word in all_words_flat:
+            if word in self.word_dict:
+                num_word[word] += 1
+        # print(num_word)
+        spell_misspells = defaultdict(list) # misspelled_word : [possible corrections]
+        for keyword in tqdm(num_word.keys()):
+            if keyword == 'wlel':
+                print('it is keyword')
+            # print(keyword)
+            misspellings = self.find_misspellings(all_words_flat, keyword)
+            # print(f'\n{misspellings}')
+            if misspellings != 'PASS':
+                # print(f'{keyword} misspelling_no pass')
+                for misspell in misspellings.keys():
+                    spell_misspells[misspell].append(keyword)
+            
+        spell_misspells = dict(spell_misspells)
+        self.to_json(spell_misspells)
+        return num_word, dict(spell_misspells)
+        
     def tokenize(self, text):
         return re.findall(r'\b\w+\b', text)
 
     def normalize(self, text):
-        return re.sub(r'(.)\1{2,}', r'\1', text)
-
-    def find_misspellings(self, texts, target_word, threshold=2, max_distance=2):
-        all_words = [word for text in texts for word in self.tokenize(text)]
+        pattern = r'(.)\1{2,}'
+        text = re.sub(pattern, r'\1', text)
+        pattern = r'[^a-zA-Z0-9+]'
+        return re.sub(pattern, '', text)
+    
+        
+    def find_misspellings(self, all_words, keyword, threshold=2, max_distance=2):
+        '''
+        this function does not replace the misspells
+        '''
         word_count = Counter(all_words)
-        bag_of_words = {}
+        bag_of_words = defaultdict(int) # count
+        
         for word, count in word_count.items():
-            # if ' '.join([r'\u{:04X}'.format(ord(ele)) for ele in word]) == ' '.join([r'\u{:04X}'.format(ord(ele)) for ele in target_word]):
-            if word == target_word:
+            # Normalize the word for comparison
+            normalized_word = self.normalize(word)
+            
+            # Exclude the keyword itself or its normalized version
+            if normalized_word.lower() == keyword.lower():
                 continue
-            elif word.lower() == target_word.lower():
+    
+            # Exclude non-alphabetic, all-uppercase, and capitalized words (like proper nouns)
+            if not word.isalpha() or word.isupper() or word[0].isupper():
                 continue
-            elif word.lower() in self.eng_dict.keys():
+    
+            # Exclude correctly spelled words and very short words
+            if normalized_word.lower() in self.word_dict or len(normalized_word) < 4:
                 continue
-            elif len(word) == 1:
-                continue
-            elif word != target_word and count < threshold:
-                word = self.normalize(word)
-                if distance(word, target_word) <= max_distance:
-                    try:
-                        bag_of_words[word] += 1
-                    except KeyError:
-                        bag_of_words[word] = 1
+    
+            # Check for similarity and count frequency of potential misspellings
+            if distance(normalized_word, keyword) <= max_distance:
+                bag_of_words[normalized_word] += 1
+        
+        return 'PASS' if not bag_of_words else bag_of_words
 
-        if bag_of_words == {}:
-            return 'PASS'
-        else:
-            return bag_of_words
+    
+    def bert_predict_masked_word(self, sentence, masked_index):
+        inputs = tokenizer.encode(sentence, return_tensors='pt')
+        mask_token_index = torch.where(inputs == tokenizer.mask_token_id)[1]
+    
+        token_logits = model(inputs).logits
+        mask_token_logits = token_logits[0, mask_token_index, :]
+        top_tokens = torch.topk(mask_token_logits, 5, dim=1).indices[0].tolist()
+    
+        return [tokenizer.decode([token]) for token in top_tokens]
 
-    def funct(self, list_text):
-        num_word = {}
-        for text in list_text:
-            for word in text.split():
-                if word in self.eng_dict.keys():
-                    num_w = text.count(word)
-                    try:
-                        num_word[word] += num_w
-                    except KeyError:
-                        num_word[word] = num_w
-
-        spell_misspells = {}
-        for keyword in num_word.keys():
-            misspellings = self.find_misspellings(list_text, keyword)
-            if misspellings == 'PASS':
-                continue
-
-            else:
-                for misspells in list(misspellings.keys()):
-                    try:
-                        spell_misspells[misspells].append(keyword)
-                    except KeyError:
-                        spell_misspells[misspells] = [keyword]
-
-        return num_word, spell_misspells
-
-    def most_contextually_appropriate(self, word_options, sentence):
+    def most_contextually_appropriate(self, word_options, sentence, threshold=0.8):
         doc = nlp(sentence)
         best_word = None
         best_sim = 0
@@ -122,77 +173,105 @@ class SpellChecker:
                 sim = token.similarity(option_token)
                 if sim > best_sim:
                     best_sim = sim
-                    best_word = option
-        return best_word
-
-    def predict_masked_word(self, sentence, masked_index):
-        inputs = tokenizer.encode(sentence, return_tensors='pt')
-        mask_token_index = torch.where(inputs == tokenizer.mask_token_id)[1]
-
-        token_logits = model(inputs).logits
-        mask_token_logits = token_logits[0, mask_token_index, :]
-        top_tokens = torch.topk(mask_token_logits, 5, dim=1).indices[0].tolist()
-
-        return [tokenizer.decode([token]) for token in top_tokens]
-
-
-    def to_json(self, list_text):
-        _, misspell_lists = self.funct(list_text)
-        if os.path.isfile('./data/misspell_dict.json'):
-            with open('./data/misspell_dict.json', 'r') as file:
-                existing_data = json.load(file)
-        else:
-            existing_data = {}
-
-        for key, value in misspell_lists.items():
-            if key in existing_data.keys():
-                existing_data[key].extend([i for i in value if i not in existing_data[key]])
+                    best_word = option                    
+        return best_word if best_sim > threshold else None
+    
+    def character_match_score(self, word1, word2):
+        """
+        Calculate a score based on the longest common subsequence (LCS) 
+        between two words.
+        """
+        def lcs_length(x, y):
+            """Helper function to compute length of LCS."""
+            if not x or not y:
+                return 0
+            elif x[-1] == y[-1]:
+                return 1 + lcs_length(x[:-1], y[:-1])
             else:
-                existing_data[key] = value
-
-        with open('./data/misspell_dict.json', 'w') as file:
-            json.dump(misspell_lists, file, indent=4)
+                return max(lcs_length(x[:-1], y), lcs_length(x, y[:-1]))
+    
+        lcs_len = lcs_length(word1, word2)
+        score = lcs_len / max(len(word1), len(word2)) # Normalized by the length of the longer word
+        return score
+    
+    def find_most_sim_char(self, misspelled_word, replacements, threshold=0.5):
+        """
+        Find the best replacement for a misspelled word from a list of replacements.
+        """
+        best_match = None
+        highest_score = -1
+    
+        for replacement in replacements:
+            score = self.character_match_score(misspelled_word, replacement)
+            if score > highest_score:
+                highest_score = score
+                best_match = replacement
+    
+        return best_match if highest_score >= threshold else None        
 
     def text_replace(self, list_text):
-        _, spell_misspells = self.funct(list_text)
-
         fixed_text_list = []
         for text in tqdm(list_text):
             new_text = text.split()
             for idx, word in enumerate(text.split()):
-                new_text[idx] = self.normalize(word)
-                word = self.normalize(word)
-                if word not in spell_misspells.keys():
+                norm_word = self.normalize(word)
+                new_text[idx] = norm_word
+                if norm_word not in self.spell_misspells.keys():
                     continue
-
-                if len(spell_misspells[word]) == 1:
-                    similar_word = spell_misspells[word][0]
+                    
+                if len(self.spell_misspells[word]) == 1:
+                    similar_word = self.spell_misspells[word][0]
                     new_text[idx] = similar_word
 
+            
             words = new_text.copy()
             for idx, word in enumerate(words):
-                if word in spell_misspells.keys():
+                if word in self.spell_misspells.keys():
+                    # print(f"Word: {word}, Replacements: {self.spell_misspells[word]}")
+
                     masked_sentence = words.copy()
+                    word = self.normalize(word)
                     masked_sentence[idx] = tokenizer.mask_token
                     masked_sentence = ' '.join(masked_sentence)
-                    replacements = self.predict_masked_word(masked_sentence, idx)
+                    replacements = self.bert_predict_masked_word(masked_sentence, idx)
                     similar_word = None
+                    # print(f'BERT searching for the right replacement for word : {word}...')
                     for replacement in replacements:
-                        if replacement in spell_misspells[word]:
+                        if replacement in self.spell_misspells[word]:
                             similar_word = replacement
+                            # print(f'BERT found word replacement for word, the correct word is "{replacement}"\n')
                             break
+                            
                     if not similar_word:
-                        for replacement in spell_misspells[word]:
-                            if word[0] == replacement[0]:
-                                similar_word = replacement
-                                break
+                        # print(f'searching contextually appropriate words for word : {word}...')
+                        similar_word = self.most_contextually_appropriate(self.spell_misspells[word], text)
+                        # if similar_word:
+                            # print(f'found the word with the contextual search method, the correct word is "{similar_word}"\n')
+                        # break
+                        
                     if not similar_word:
-                        # similar_word = self.most_contextually_appropriate(spell_misspells[word], text)
-                        similar_word = min(spell_misspells[word], key=lambda x: distance(word, x))
+                        # print(f'searching word with most similar characters word : {word}...')
+                        similar_word = self.find_most_sim_char(word, self.spell_misspells[word])
+                        # if similar_word:
+                            # print(f'found the word with most similar characters method, the correct word is "{similar_word}"\n')
+                        # break
+                    
+                    if not similar_word:
+                        # print(f'searching word with minimum edit distance word : {word}...')
+                        similar_word = min(self.spell_misspells[word], key=lambda x: distance(word, x))
+                        # if similar_word:
+                            # print(f'found the word with minimum edit distance method, the correct word is "{similar_word}"\n')
+                        # break
+                    
+                    # if not similar_word:
+                        # print(f"oops, didn't find similar word for {word}")
+                        
                     new_text[idx] = similar_word if similar_word else word
-
-                    # similar_word = self.most_contextually_appropriate(spell_misspells[word], text)
-
+        
+                    
+                    # similar_word = self.most_contextually_appropriate(self.spell_misspells[word], text)
+                
             fixed_text_list.append(' '.join(new_text))
-        self.to_json(list_text=list_text)
+                
+            
         return fixed_text_list
