@@ -22,26 +22,29 @@
 
 """
 .. module:: json_speller
-   :synopsis: Module for spelling correction utilizing distilbert, Levenshtine distance.
+   :synopsis: Module for spelling correction utilizing distilbert, Levenshtine distance, character similarity comparison, editdistance.
 """
 
 
 import os
 import re
 import json
+import pandas as pd
 from tqdm import tqdm
 import spacy
-from collections import Counter
+from collections import Counter, defaultdict
 from Levenshtein import distance
-from transformers import AutoTokenizer, AutoModelForMaskedLM
+from transformers import AutoTokenizer, AutoModelForMaskedLM, pipeline
 import torch
 nlp = spacy.load('en_core_web_lg')
 tokenizer = AutoTokenizer.from_pretrained('distilbert-base-uncased')
 model = AutoModelForMaskedLM.from_pretrained('distilbert-base-uncased')
 
-freq_dict = './data/symspell_freq_dict 2.txt'
-with open(freq_dict, 'r') as f:
-    freq_d = f.read()
+
+word_dictionary = pd.read_json('./data/word_dict.json', typ='series')
+word_dict = word_dictionary.keys()
+
+
 
 freq_d = freq_d.replace('\ufeff', '')
 sym_words = {}
