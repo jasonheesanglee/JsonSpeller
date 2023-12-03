@@ -7,6 +7,8 @@ Training in progress
 
 마음에 쏙드는 한국어 맞춤법교정기가 없어서... 만들어보는 중이고... 시험삼아 영어를 먼저 만들어 보았습니다!<br><br>
 
+### Only Supporting English as of 231204.
+
 While working on my final project, I realized that there are not much great spellcheckers for Korean.<br>
 Therefore, I have decided to create one.<br>
 Named it JSON_SPELLER as it works based on JSON file. <s>Not because I am Jason</s><br>
