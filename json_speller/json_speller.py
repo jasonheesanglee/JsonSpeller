@@ -71,6 +71,7 @@ class SpellChecker:
         self.num_word, self.spell_misspells = self.funct(list_text)
 
     def to_json(self, spell_misspells):
+        print('tojson')
         """
         Exports the mappings of misspelled words to their potential corrections to a JSON file.
 
@@ -104,11 +105,11 @@ class SpellChecker:
         Returns:
             tuple: A tuple containing two dictionaries - one for word counts and one for misspellings.
         """
-        tokenized_texts = [self.tokenize(text) for text in list_text]
-        all_words_flat = [word for text in tokenized_texts for word in text]
+        tokenized_texts = [self.tokenize(text) for text in tqdm(list_text)]
+        all_words_flat = [self.normalize(word) for text in tqdm(tokenized_texts) for word in text]
         word_count = Counter(all_words_flat)
         num_word = defaultdict(int)  
-        for word, count in word_count.items():
+        for word, count in tqdm(word_count.items()):
             if all_words_flat.count(word) / len(all_words_flat) >= 0.05:
                 self.word_dict.add(word)
 
@@ -118,7 +119,7 @@ class SpellChecker:
         # Process for misspellings
         spell_misspells = defaultdict(list)
         
-        for keyword in num_word.keys():
+        for keyword in tqdm(num_word.keys()):
             # Skip known words
             if word in self.word_dict:
                 continue
@@ -135,6 +136,7 @@ class SpellChecker:
         return num_word, dict(spell_misspells)
         
     def tokenize(self, text):
+        # print('tokenize')
         """
         Tokenizes the given text into words.
 
@@ -159,7 +161,10 @@ class SpellChecker:
         pattern = r'(.)\1{2,}'
         text = re.sub(pattern, r'\1', text)
         pattern = r'[^a-zA-Z0-9+]'
-        return re.sub(pattern, '', text)
+        text = re.sub(pattern, '', text)
+        text = text.replace('@', '')
+        return text
+        
         
     def prefixe_suffix(self, word):
         """
@@ -183,6 +188,26 @@ class SpellChecker:
         return any(word.startswith(prefix) for prefix in prefixes or word.endswith(suffix) for suffix in suffixes)
     
     def unconcatenating_word(self, all_words):
+        """
+        Processes a list of words, attempting to segment each word into smaller components that are meaningful. 
+        It returns a dictionary mapping each original word to its segmented form if segmentation is successful.
+    
+        Args:
+            all_words (list): A list of words to be processed.
+    
+        Returns:
+            defaultdict: A dictionary where each key is a word from the input list and each value is a list containing the segmented form of the word, if segmentation was successful.
+    
+        The function performs the following steps:
+        - It initializes a defaultdict `unconcatenated` to store the results.
+        - For each word in `all_words`, it checks if the word is already known (present in `self.word_dict`). If so, it skips further processing for that word.
+        - Otherwise, it attempts to segment the word into smaller parts using the `segment` function.
+        - For each segmented part, it checks if it is in `self.word_dict`. It counts valid segments based on specific criteria:
+            - Single-letter words are only counted if they are 'a' or 'i'.
+            - For longer words, it counts the number of vowels. Words without vowels or certain 'wh' words not in a specific list are not counted.
+        - If all segments of a word are valid, the word and its segmented form are added to the `unconcatenated` dictionary.
+        - Finally, the function returns the `unconcatenated` dictionary.
+        """
         unconcatenated = defaultdict(list)
         
         for initial_word in all_words:
@@ -213,9 +238,9 @@ class SpellChecker:
                         if vowels == 0:
                             continue
                             
-                        elif word.startswith('wh'):
-                            if word not in ['where', 'why', 'who', 'what', 'when']:
-                                continue
+                        # elif word.startswith('wh'):
+                        #     if word not in ['where', 'why', 'who', 'what', 'when']:
+                        #         continue
                         else:
                             count__ += 1
                     
@@ -367,8 +392,6 @@ class SpellChecker:
         Returns:
             list: A list of texts with misspelled words replaced.
         """
-        tokenized_texts = [self.tokenize(text) for text in list_text]
-        all_words_flat = [word for text in tokenized_texts for word in text]
         fixed_text_list = []
         for text in tqdm(list_text):
             new_text = text.split()
@@ -381,9 +404,9 @@ class SpellChecker:
                 if norm_word not in self.spell_misspells.keys():
                     continue
                     
-                if len(self.spell_misspells[word]) == 1:
-                    print(f"\nWord: {word}, Replacements: {self.spell_misspells[word]}")
-                    similar_word = self.spell_misspells[word][0]
+                if len(self.spell_misspells[norm_word]) == 1:
+                    # print(f"\nWord: {word}, Replacements: {self.spell_misspells[norm_word]}")
+                    similar_word = self.spell_misspells[norm_word][0]
                     new_text[idx] = similar_word
                     continue
                     
@@ -391,7 +414,7 @@ class SpellChecker:
             for idx, word in enumerate(words):
                 if word in self.spell_misspells.keys():
                     
-                    print(f"\nWord: {word}, Replacements: {self.spell_misspells[word]}")
+                    # print(f"\nWord: {word}, Replacements: {self.spell_misspells[word]}")
 
                     masked_sentence = words.copy()
                     word = self.normalize(word)
@@ -399,34 +422,34 @@ class SpellChecker:
                     masked_sentence = ' '.join(masked_sentence)
                     replacements = self.bert_predict_masked_word(masked_sentence, idx)
                     similar_word = None
-                    print(f'BERT searching for the right replacement for word : {word}...')
+                    # print(f'BERT searching for the right replacement for word : {word}...')
                     for replacement in replacements:
                         if replacement in self.spell_misspells[word]:
                             similar_word = replacement
-                            print(f'BERT found word replacement for word, the correct word is "{replacement}"\n\n')
+                            # print(f'BERT found word replacement for word, the correct word is "{replacement}"\n\n')
                             break
                             
                     if not similar_word:
-                        print(f'searching contextually appropriate words for word : {word}...')
+                        # print(f'searching contextually appropriate words for word : {word}...')
                         similar_word = self.most_contextually_appropriate(self.spell_misspells[word], text)
-                        if similar_word:
-                            print(f'found the word with the contextual search method, the correct word is "{similar_word}"\n\n')
+                        # if similar_word:
+                            # print(f'found the word with the contextual search method, the correct word is "{similar_word}"\n\n')
                             
                     if not similar_word:
-                        print(f'searching word with most similar characters word : {word}...')
+                        # print(f'searching word with most similar characters word : {word}...')
                         similar_word = self.find_most_sim_char(word, self.spell_misspells[word])
-                        if similar_word:
-                            print(f'found the word with most similar characters method, the correct word is "{similar_word}"\n\n')
+                        # if similar_word:
+                        #     print(f'found the word with most similar characters method, the correct word is "{similar_word}"\n\n')
                             
                     if not similar_word:
-                        print(f'searching word with minimum edit distance word : {word}...')
+                        # print(f'searching word with minimum edit distance word : {word}...')
                         similar_word = min(self.spell_misspells[word], key=lambda x: distance(word, x))
-                        if similar_word:
-                            print(f'found the word with minimum edit distance method, the correct word is "{similar_word}"\n\n')
+                        # if similar_word:
+                        #     print(f'found the word with minimum edit distance method, the correct word is "{similar_word}"\n\n')
 
                     
-                    if not similar_word:
-                        print(f"oops, didn't find similar word for {word}")
+                    # if not similar_word:
+                        # print(f"oops, didn't find similar word for {word}")
                         
                         
                     new_text[idx] = similar_word if similar_word else word
