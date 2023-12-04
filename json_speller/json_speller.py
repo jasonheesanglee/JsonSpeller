@@ -518,32 +518,28 @@ class SpellChecker:
             
         return fixed_text_list
 
-
+    
 # example_texts = [
 #     "Hello this is the new world",
 #     "this rowld is baeutiful",
 #     "Adam and Eve came to this new world",
 #     "thiis wword is beautiful",
-    # 'hello hi',
-    # 'hellohi',
-    # 'what is your purpose?',
-    # "don't tell me what to do",
-    # 'what do you want from me',
-    # 'This friday should be fun',
-    # "this doesn't work at all?",
-    # 'i am so soso tired',
-    # 'yaaaaaay today is friiiiidaaaaaayyyyyyyy',
-    # 'yo whta are you doing',
-    # 'iamsotired',
-    # 'why is this not working so well',
-    # 'I believe this should wokr welwl',
+#     'what the fuke',
+#     'the fuck sake',
+#     'whaat the fucck',
+#     'hello hi',
+#     'hellohi',
+#     'what is your purpose?',
+#     "don't tell me what to do",
+#     'what do you want from me',
+#     'This friday should be fun',
+#     "this doesn't work at all?",
+#     'i am so soso tired',
+#     'yaaaaaay today is friiiiidaaaaaayyyyyyyy',
+#     'yo whta are you doing',
+#     'iamsotired',
+#     'why is this not working so well',
+#     'I believe this should wokr welwl',
+#     'love #chennai love #india with @mybrother'
 # ]
-
-
-# spell_checker = SpellChecker(list_text=example_texts, word_dict=word_dict)
-# final = spell_checker.text_replace(example_texts)
-# print(example_texts[:2])
-# print()
-# for original, fixed in zip(example_texts, final):
-#     print(f'{original} - original')
-#     print(f'{fixed} - fixed\n')
+# spell_checker = SpellChecker(list_text=disaster_tweets, word_dict=word_dict)
