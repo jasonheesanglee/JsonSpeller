@@ -68,7 +68,7 @@ class SpellChecker:
         """
         self.list_text = list_text
         self.word_dict = set(word_dict)
-        self.num_word, self.spell_misspells = self.funct(list_text)
+        
 
     def to_json(self, spell_misspells):
         print('tojson')
@@ -382,7 +382,7 @@ class SpellChecker:
         return best_match if highest_score >= threshold else None        
 
                 
-    def text_replace(self, list_text):
+    def train_replace(self, list_text):
         """
         Replaces misspelled words in the given list of texts using various strategies.
 
@@ -392,6 +392,7 @@ class SpellChecker:
         Returns:
             list: A list of texts with misspelled words replaced.
         """
+        num_word, spell_misspells = self.funct(list_text)
         fixed_text_list = []
         for text in tqdm(list_text):
             new_text = text.split()
@@ -401,18 +402,18 @@ class SpellChecker:
                 # if re.fullmatch(r'[a-zA-Z0-9+]',word)!=True:
                 #     continue
                 #     # print(self.spell_misspells[word])
-                if norm_word not in self.spell_misspells.keys():
+                if norm_word not in spell_misspells.keys():
                     continue
                     
                 if len(self.spell_misspells[norm_word]) == 1:
                     # print(f"\nWord: {word}, Replacements: {self.spell_misspells[norm_word]}")
-                    similar_word = self.spell_misspells[norm_word][0]
+                    similar_word = spell_misspells[norm_word][0]
                     new_text[idx] = similar_word
                     continue
                     
             words = new_text.copy()
             for idx, word in enumerate(words):
-                if word in self.spell_misspells.keys():
+                if word in spell_misspells.keys():
                     
                     # print(f"\nWord: {word}, Replacements: {self.spell_misspells[word]}")
 
@@ -424,7 +425,7 @@ class SpellChecker:
                     similar_word = None
                     # print(f'BERT searching for the right replacement for word : {word}...')
                     for replacement in replacements:
-                        if replacement in self.spell_misspells[word]:
+                        if replacement in spell_misspells[word]:
                             similar_word = replacement
                             # print(f'BERT found word replacement for word, the correct word is "{replacement}"\n\n')
                             break
@@ -456,6 +457,61 @@ class SpellChecker:
         
                     
                     # similar_word = self.most_contextually_appropriate(self.spell_misspells[word], text)
+                
+            fixed_text_list.append(' '.join(new_text))
+                
+            
+        return fixed_text_list
+        
+    def spell_check(self, list_text):
+        """
+        Replaces misspelled words in the given list of texts using various strategies.
+    
+        Args:
+            list_text (list): A list of texts to process.
+    
+        Returns:
+            list: A list of texts with misspelled words replaced.
+        """
+        spell_misspells = pd.read_json('misspell_dict.json', typ=dict)
+        fixed_text_list = []
+        for text in tqdm(list_text):
+            new_text = text.split()
+            words = new_text.copy()
+            for idx, word in enumerate(text.split()):
+                if word in spell_misspells.keys():    
+                    masked_sentence = words.copy()
+                    word = self.normalize(word)
+                    masked_sentence[idx] = tokenizer.mask_token
+                    masked_sentence = ' '.join(masked_sentence)
+                    replacements = self.bert_predict_masked_word(masked_sentence, idx)
+                    similar_word = None
+                    # print(f'BERT searching for the right replacement for word : {word}...')
+                    for replacement in replacements:
+                        if replacement in spell_misspells[word]:
+                            similar_word = replacement
+                            # print(f'BERT found word replacement for word, the correct word is "{replacement}"\n\n')
+                            break
+                            
+                    if not similar_word:
+                        # print(f'searching contextually appropriate words for word : {word}...')
+                        similar_word = self.most_contextually_appropriate(spell_misspells[word], text)
+                        # if similar_word:
+                            # print(f'found the word with the contextual search method, the correct word is "{similar_word}"\n\n')
+                            
+                    if not similar_word:
+                        # print(f'searching word with most similar characters word : {word}...')
+                        similar_word = self.find_most_sim_char(word, spell_misspells[word])
+                        # if similar_word:
+                        #     print(f'found the word with most similar characters method, the correct word is "{similar_word}"\n\n')
+                            
+                    if not similar_word:
+                        # print(f'searching word with minimum edit distance word : {word}...')
+                        similar_word = min(spell_misspells[word], key=lambda x: distance(word, x))
+                        # if similar_word:
+                        #     print(f'found the word with minimum edit distance method, the correct word is "{similar_word}"\n\n')                        
+                        
+                    new_text[idx] = similar_word if similar_word else word
                 
             fixed_text_list.append(' '.join(new_text))
                 
