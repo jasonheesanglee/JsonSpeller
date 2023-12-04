@@ -1,13 +1,69 @@
 # json_speller
 
-Training in progress
+## Training in progress
+
+### Currently Only Supporting English.
+
+=============================
+
+# Main Functions
+
+
+1. spell_check(list_text, deep_search=True, context_search=True, sim_char_search=True)
+    Replaces the misspelled words in the given list of texts using various strategies without training.
+    
+    - `list_text` : python list of texts.
+    - (Will be updated) `deep_search` : default=True | enables / disables deep-learning search.
+    - (Will be updated) `context_search` : default=True | enables / disables context search.
+    - (Will be updated) `sim_char_search` : default=True | enables / disables similar character search.
+
+2. train_check(list_text, deep_search=True, context_search=True, sim_char_search=True)
+    Train the words in the given list and updates the misspell.json
+    Then replaces the misspelled words in the given list of texts using various strategies.
+    
+    - `list_text` : python list of texts.
+    - (Will be updated) `deep_search` : default=True | enables / disables deep-learning search.
+    - (Will be updated) `context_search` : default=True | enables / disables context search.
+    - (Will be updated) `sim_char_search` : default=True | enables / disables similar character search.
+
+3. train(list_text)
+    Train the words in the given list and updates the misspell.json
+    - `list_text` : python list of texts.
+
+
+# Material used in Training
+
+- [COVID19 Tweets](https://www.kaggle.com/datasets/gpreda/covid19-tweets) by [@Gabirel Preda](https://github.com/gabrielpreda)
+- [Disaster Tweets](https://www.kaggle.com/datasets/vstepanenko/disaster-tweets) by [@Viktor Stepanenko](https://www.kaggle.com/vstepanenko)
+- [Bitcoin tweets](https://www.kaggle.com/datasets/alaix14/bitcoin-tweets-20160101-to-20190329) by [@Alexandre Bouillet](https://github.com/alexandrebouillet)
+- More in line...
+
+
+# Comparison
+(to be observed once training is done.)
+
+1. json_speller
+
+2. autocorrect
+
+3. textblob
+
+4. symspellpy
+
+5. pyspellcheck
+
+
+
+=============================
+
+# Why did I make this?
+
 
 ### 답답하면 니가 뛰던지
-의 '니'를 맡게 되었습니다.
+의 '니'가 되었습니다.
 
 마음에 쏙드는 한국어 맞춤법교정기가 없어서... 만들어보는 중이고... 시험삼아 영어를 먼저 만들어 보았습니다!<br><br>
 
-### Only Supporting English as of 231204.
 
 While working on my final project, I realized that there are not much great spellcheckers for Korean.<br>
 Therefore, I have decided to create one.<br>
@@ -65,13 +121,6 @@ For example the **key - value_array** will look like : **"wword" : ["word", "wor
 - But... will there really be that many typo variants for one word...?
 - ***유저들의 행동이 모든게 계획대로 돌아가야 함.***
 
-# Training Materials
-- [COVID19 Tweets](https://www.kaggle.com/datasets/gpreda/covid19-tweets) by [@Gabirel Preda](https://github.com/gabrielpreda)
-- [Disaster Tweets](https://www.kaggle.com/datasets/vstepanenko/disaster-tweets) by [@Viktor Stepanenko](https://www.kaggle.com/vstepanenko)
-- [Bitcoin tweets](https://www.kaggle.com/datasets/alaix14/bitcoin-tweets-20160101-to-20190329) by [@Alexandre Bouillet](https://github.com/alexandrebouillet)
-- More in line...
-
 
 Last but not least, a great ***THANK YOU*** my teammates for being patient with me!
 [@nayoungbae](https://www.kaggle.com/nayoungbae) [@chanhyukhan](https://www.kaggle.com/chanhyukhan) [@bangsioni](https://www.kaggle.com/bangsioni)
-
