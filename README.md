@@ -65,6 +65,12 @@ For example the **key - value_array** will look like : **"wword" : ["word", "wor
 - But... will there really be that many typo variants for one word...?
 - ***유저들의 행동이 모든게 계획대로 돌아가야 함.***
 
+# Training Materials
+- [COVID19 Tweets](https://www.kaggle.com/datasets/gpreda/covid19-tweets) by [@Gabirel Preda](https://github.com/gabrielpreda)
+- [Disaster Tweets](https://www.kaggle.com/datasets/vstepanenko/disaster-tweets) by [@Viktor Stepanenko](https://www.kaggle.com/vstepanenko)
+- [Bitcoin tweets](https://www.kaggle.com/datasets/alaix14/bitcoin-tweets-20160101-to-20190329) by [@Alexandre Bouillet](https://github.com/alexandrebouillet)
+- More in line...
+
 
 Last but not least, a great ***THANK YOU*** my teammates for being patient with me!
 [@nayoungbae](https://www.kaggle.com/nayoungbae) [@chanhyukhan](https://www.kaggle.com/chanhyukhan) [@bangsioni](https://www.kaggle.com/bangsioni)
