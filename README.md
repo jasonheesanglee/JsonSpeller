@@ -4,29 +4,27 @@
 
 ### Currently Only Supporting English.
 
-=============================
-
 # Main Functions
 
 
-1. spell_check(list_text, deep_search=True, context_search=True, sim_char_search=True)
+1. `spell_check`(list_text, deep_search=True, context_search=True, sim_char_search=True)
     Replaces the misspelled words in the given list of texts using various strategies without training.
     
     - `list_text` : python list of texts.
-    - (Will be updated) `deep_search` : default=True | enables / disables deep-learning search.
-    - (Will be updated) `context_search` : default=True | enables / disables context search.
-    - (Will be updated) `sim_char_search` : default=True | enables / disables similar character search.
+    - `deep_search` : default=True | enables / disables deep-learning search.
+    - `context_search` : default=True | enables / disables context search.
+    - `sim_char_search` : default=True | enables / disables similar character search.
 
-2. train_check(list_text, deep_search=True, context_search=True, sim_char_search=True)
+2. `train_check`(list_text, deep_search=True, context_search=True, sim_char_search=True)
     Train the words in the given list and updates the misspell.json
     Then replaces the misspelled words in the given list of texts using various strategies.
     
     - `list_text` : python list of texts.
-    - (Will be updated) `deep_search` : default=True | enables / disables deep-learning search.
-    - (Will be updated) `context_search` : default=True | enables / disables context search.
-    - (Will be updated) `sim_char_search` : default=True | enables / disables similar character search.
+    - `deep_search` : default=True | enables / disables deep-learning search.
+    - `context_search` : default=True | enables / disables context search.
+    - `sim_char_search` : default=True | enables / disables similar character search.
 
-3. train(list_text)
+3. `train`(list_text)
     Train the words in the given list and updates the misspell.json
     - `list_text` : python list of texts.
 
@@ -53,8 +51,6 @@
 5. pyspellcheck
 
 
-
-=============================
 
 # Why did I make this?
 
