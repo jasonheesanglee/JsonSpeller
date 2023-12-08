@@ -2,7 +2,7 @@
 
 ## Training in progress
 
-### Currently Only Supporting English.
+### Currently Only Supports English.
 
 # Main Functions
 
