@@ -7,7 +7,7 @@
 # Main Functions
 
 
-1. `spell_check(list_text, deep_search=True, context_search=True, sim_char_search=True)`
+1. `spell_check(list_text, deep_search=True, context_search=True, sim_char_search=True)`<br>
     Replaces the misspelled words in the given list of texts using various strategies without training.
     
     - `list_text` : python list of texts.
@@ -15,7 +15,7 @@
     - `context_search` : default=True | enables / disables context search.
     - `sim_char_search` : default=True | enables / disables similar character search.
 
-2. `train_check(list_text, deep_search=True, context_search=True, sim_char_search=True)`
+2. `train_check(list_text, deep_search=True, context_search=True, sim_char_search=True)`<br>
     Train the words in the given list and updates the misspell.json
     Then replaces the misspelled words in the given list of texts using various strategies.
     
@@ -24,7 +24,7 @@
     - `context_search` : default=True | enables / disables context search.
     - `sim_char_search` : default=True | enables / disables similar character search.
 
-3. `train(list_text)`
+3. `train(list_text)`<br>
     Train the words in the given list and updates the misspell.json
     - `list_text` : python list of texts.
 
