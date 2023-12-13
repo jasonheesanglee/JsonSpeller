@@ -2,7 +2,7 @@
 
 ## Training in progress
 
-### Currently Only Supports English.
+### Under Development
 
 # Main Functions
 
