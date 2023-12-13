@@ -1,4 +1,4 @@
-# json_speller
+# JsonSpeller
 
 ## Training in progress
 
@@ -40,7 +40,7 @@
 # Comparison
 (to be observed once training is done.)
 
-1. json_speller
+1. JsonSpeller
 
 2. autocorrect
 
@@ -63,7 +63,7 @@
 
 While working on my final project, I realized that there are not much great spellcheckers for Korean.<br>
 Therefore, I have decided to create one.<br>
-Named it JSON_SPELLER as it works based on JSON file. <s>Not because I am Jason</s><br>
+Named it JsonSpeller as it works based on JSON file. <s>Not because I am Jason</s><br>
 
 Before diving into my spellchecker, here are the results of different spellcheckers.<br>
 *We had around 2,000 data to spellcheck.*
@@ -85,7 +85,7 @@ Before diving into my spellchecker, here are the results of different spellcheck
 ***symspellpy-ko*** would have been the best model among the models above, only if the perfect word-list, including neologisms.<br><br>
 
 Then I thought "***What if we make typos for words on purpose, and put them in the dictionary to replace them?***" <br>
-But creating typos would be too inefficient, even if generate them with LLMs.<br>Below is the modified version of this ***Thought*** I had.<br>(The current version I have developed can only perform spell check on English, and it will be developed for Korean soon.)<br>Please kindly go through them and tell me if this method would be too inefficient or if there is any problems I haven't thought of.<br>*Disclaimer We are working on extracting the keywords from the users’ daily records and segment them into “Positive” and “Negative” emotions, as explained in this [discussion](https://www.kaggle.com/discussions/general/456900) and this **json_speller** was initially developed solely for this project.*<br><br>
+But creating typos would be too inefficient, even if generate them with LLMs.<br>Below is the modified version of this ***Thought*** I had.<br>(The current version I have developed can only perform spell check on English, and it will be developed for Korean soon.)<br>Please kindly go through them and tell me if this method would be too inefficient or if there is any problems I haven't thought of.<br>*Disclaimer We are working on extracting the keywords from the users’ daily records and segment them into “Positive” and “Negative” emotions, as explained in this [discussion](https://www.kaggle.com/discussions/general/456900) and this **JsonSpeller** was initially developed solely for this project.*<br><br>
 
 # Facts & Hypothesis
 A keyword term must appear at least twice to be considered a keyword.<br>
